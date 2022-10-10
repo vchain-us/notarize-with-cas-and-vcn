@@ -1,0 +1,1 @@
+This is a reusable workflow to notarize a repository with `cas` and `vcn`.
