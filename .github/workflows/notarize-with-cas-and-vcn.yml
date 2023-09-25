@@ -3,9 +3,6 @@ name: Notarize repository with cas and vcn
 on:
   workflow_call:
     secrets:
-      cas-api-key:
-        description: 'The signer key for cas.'
-        required: true
       vcn-api-key:
         description: 'The signer key for vcn.'
         required: true
@@ -18,8 +15,6 @@ jobs:
     name: Notarize repository
     runs-on: [self-hosted, linux]
     env:
-      CAS_HOST: cas.codenotary.com
-      CAS_API_KEY: ${{ secrets.cas-api-key }}
       VCN_LC_HOST: ${{ secrets.vcn-host }}
       VCN_LC_API_KEY: ${{ secrets.vcn-api-key }}
     steps:
@@ -30,24 +25,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Get latest released cas version
-        id: cas-version
-        run: >
-          echo "::set-output name=latest::$(
-          curl -s -H 'Accept: application/vnd.github+json'
-          -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}'
-          https://api.github.com/repos/codenotary/cas/releases/latest | jq -r '.name'
-          )"
-
-      - name: Download cas
-        run: |
-          curl -s -o cas -L https://github.com/codenotary/cas/releases/download/${{ steps.cas-version.outputs.latest }}/cas-${{ steps.cas-version.outputs.latest }}-linux-amd64-static
-          chmod +x cas
-
-      # Notarize only repository as cas cannot notarize the directory
-      - name: Notarize git repository with cas
-        run: ./cas n git://$GITHUB_WORKSPACE
 
       - name: Download vcn
         run: |
